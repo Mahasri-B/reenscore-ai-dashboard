@@ -6,9 +6,23 @@ import { Sun, Moon, Zap, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Navbar() {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true); // Default to dark mode
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    // Check system preference or localStorage
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setIsDark(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDark(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,13 +32,18 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (isDark) {
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    
+    if (newTheme) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
-  }, [isDark]);
+  };
 
   return (
     <motion.nav
@@ -63,13 +82,14 @@ export default function Navbar() {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => setIsDark(!isDark)}
-              className="p-2 rounded-lg glass hover:bg-energy-500/10 transition-colors"
+              onClick={toggleTheme}
+              className="p-2 rounded-lg glass hover:neon-border transition-all"
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {isDark ? (
-                <Sun className="w-5 h-5 text-yellow-500" />
+                <Sun className="w-5 h-5 text-yellow-400" />
               ) : (
-                <Moon className="w-5 h-5 text-energy-600" />
+                <Moon className="w-5 h-5 text-purple-600" />
               )}
             </motion.button>
 

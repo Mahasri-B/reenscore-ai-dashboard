@@ -1,0 +1,23 @@
+GitHub Push Instructions
+========================
+
+1. Go to: https://github.com/Mahasri-B
+2. Click "New repository" (green button)
+3. Repository name: greenscore-ai-dashboard
+4. Description: Enterprise renewable energy readiness dashboard for Indian states
+5. Keep it Public
+6. DO NOT initialize with README (we already have one)
+7. Click "Create repository"
+
+8. Then run these commands in your terminal:
+
+cd "C:\Users\marsh\Downloads\Energy transition readiness score\energy-transition-dashboard"
+
+git branch -M main
+git remote add origin https://github.com/Mahasri-B/greenscore-ai-dashboard.git
+git push -u origin main
+
+Done! Your code will be on GitHub.
+
+Repository URL will be:
+https://github.com/Mahasri-B/greenscore-ai-dashboard
