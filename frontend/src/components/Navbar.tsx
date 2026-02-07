@@ -7,29 +7,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
-<<<<<<< HEAD
-  const [isDark, setIsDark] = useState(true); // Default to dark mode
-=======
->>>>>>> d05045a (hk commit full ui refreshed)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
   const isLanding = pathname === '/';
-
-  useEffect(() => {
-    // Check system preference or localStorage
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
-    } else {
-      setIsDark(false);
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,22 +21,6 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-<<<<<<< HEAD
-  const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    
-    if (newTheme) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
-
-=======
->>>>>>> d05045a (hk commit full ui refreshed)
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -89,31 +55,6 @@ export default function Navbar() {
             </div>
           )}
 
-<<<<<<< HEAD
-          {/* Theme Toggle & Mobile Menu */}
-          <div className="flex items-center gap-4">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={toggleTheme}
-              className="p-2 rounded-lg glass hover:neon-border transition-all"
-              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-              {isDark ? (
-                <Sun className="w-5 h-5 text-yellow-400" />
-              ) : (
-                <Moon className="w-5 h-5 text-purple-600" />
-              )}
-            </motion.button>
-
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg glass"
-            >
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-=======
           {/* Mobile Menu Button - hidden on landing */}
           {!isLanding && (
             <div className="flex items-center gap-4">
@@ -125,7 +66,6 @@ export default function Navbar() {
               </button>
             </div>
           )}
->>>>>>> d05045a (hk commit full ui refreshed)
         </div>
 
         {/* Mobile Menu */}
