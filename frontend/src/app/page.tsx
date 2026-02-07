@@ -1,254 +1,280 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, TrendingUp, Map as MapIcon, BarChart3, Sparkles } from 'lucide-react';
-import IndiaMap from '@/components/IndiaMap';
-import { getAllStates, getGeoJSON, getSummaryStats } from '@/lib/api';
-import type { StateScore } from '@/lib/api';
+import { Map as MapIcon, Brain, Sliders, Trophy, ArrowRight, Zap, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { getSummaryStats } from '@/lib/api';
 
-export default function Home() {
-  const [states, setStates] = useState<StateScore[]>([]);
-  const [geojson, setGeojson] = useState<any>(null);
-  const [selectedState, setSelectedState] = useState<string | null>(null);
-  const [summaryStats, setSummaryStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+function AnimatedCounter({ end, duration = 2000, suffix = '', decimals = 0 }: {
+  end: number;
+  duration?: number;
+  suffix?: string;
+  decimals?: number;
+}) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const hasAnimated = useRef(false);
+
+  const animate = useCallback(() => {
+    if (hasAnimated.current) return;
+    hasAnimated.current = true;
+
+    const startTime = performance.now();
+    const step = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(eased * end);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+    requestAnimationFrame(step);
+  }, [end, duration]);
 
   useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      const [statesData, geoData, statsData] = await Promise.all([
-        getAllStates(),
-        getGeoJSON(),
-        getSummaryStats()
-      ]);
-      
-      setStates(statesData);
-      setGeojson(geoData);
-      setSummaryStats(statsData);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      setLoading(false);
-    }
-  };
-
-  const stateDataMap = new Map(
-    states.map(state => [state.state, state])
-  );
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-energy-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
-        >
-          <div className="w-16 h-16 border-4 border-energy-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-xl font-semibold gradient-text">Loading Dashboard...</p>
-        </motion.div>
-      </div>
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          animate();
+        }
+      },
+      { threshold: 0.3 }
     );
-  }
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [animate]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-950 to-gray-900">
-      {/* Hero Section */}
-      <motion.section
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden"
-      >
-        {/* Animated background */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-energy-500/30 rounded-full blur-3xl animate-pulse-slow" />
-          <div className="absolute top-1/2 left-1/4 w-80 h-80 bg-accent-500/20 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyber-500/20 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
-        </div>
-
-        <div className="relative container mx-auto px-6 py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-center mb-12"
-          >
-            <h1 className="text-4xl font-bold mb-3">
-              <span className="gradient-text">GreenScore AI</span>
-              <br />
-              <span className="text-white text-3xl">Readiness Dashboard</span>
-            </h1>
-            
-            <p className="text-base text-gray-300 max-w-4xl mx-auto leading-relaxed font-light">
-              Renewable energy readiness assessment for Indian States & Union Territories
-              with real-time insights and interactive visualizations
-            </p>
-          </motion.div>
-
-          {/* Stats Cards */}
-          {summaryStats && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
-            >
-              <StatsCard
-                icon={<MapIcon className="w-6 h-6" />}
-                label="Total States"
-                value={summaryStats.total_states}
-                color="energy"
-              />
-              <StatsCard
-                icon={<TrendingUp className="w-6 h-6" />}
-                label="Avg Score"
-                value={summaryStats.avg_score.toFixed(1)}
-                suffix="/100"
-                color="blue"
-              />
-              <StatsCard
-                icon={<Zap className="w-6 h-6" />}
-                label="Total Solar"
-                value={(summaryStats.total_capacity.solar / 1000).toFixed(1)}
-                suffix=" GW"
-                color="yellow"
-              />
-              <StatsCard
-                icon={<BarChart3 className="w-6 h-6" />}
-                label="Total Capacity"
-                value={(summaryStats.total_capacity.total / 1000).toFixed(1)}
-                suffix=" GW"
-                color="green"
-              />
-            </motion.div>
-          )}
-        </div>
-      </motion.section>
-
-      {/* Interactive Map Section */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="container mx-auto px-6 py-12"
-      >
-        <div className="glass-strong rounded-3xl p-8 shadow-2xl neon-border">
-          <h2 className="text-2xl font-bold text-white mb-6">
-            Interactive Readiness Map
-          </h2>
-          
-          <div className="h-[600px] rounded-2xl overflow-hidden bg-gray-900/50">
-            {geojson && (
-              <IndiaMap
-                geojson={geojson}
-                stateData={stateDataMap}
-                selectedState={selectedState}
-                onStateClick={setSelectedState}
-              />
-            )}
-          </div>
-        </div>
-      </motion.section>
-
-      {/* Top States Section */}
-      {summaryStats && (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="container mx-auto px-6 py-12"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Top Performers */}
-            <div className="glass rounded-2xl p-6 card-hover">
-              <h3 className="text-lg font-bold mb-4 text-energy-700 dark:text-energy-400">
-                🏆 Top Performers
-              </h3>
-              <div className="space-y-3">
-                {summaryStats.top_states.map((state: any, index: number) => (
-                  <motion.div
-                    key={state.state}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.9 + index * 0.1 }}
-                    className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-energy-50 dark:hover:bg-energy-900/20 transition-colors cursor-pointer"
-                    onClick={() => setSelectedState(state.state)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-energy-600">#{state.rank}</span>
-                      <span className="font-medium text-sm text-gray-800 dark:text-white">{state.state}</span>
-                    </div>
-                    <span className="text-base font-bold text-energy-700 dark:text-energy-400">
-                      {state.final_score.toFixed(1)}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Emerging States */}
-            <div className="glass rounded-2xl p-6 card-hover">
-              <h3 className="text-lg font-bold mb-4 text-orange-600 dark:text-orange-400">
-                🌱 Emerging States
-              </h3>
-              <div className="space-y-3">
-                {summaryStats.bottom_states.map((state: any, index: number) => (
-                  <motion.div
-                    key={state.state}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.9 + index * 0.1 }}
-                    className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
-                    onClick={() => setSelectedState(state.state)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-orange-600">#{state.rank}</span>
-                      <span className="font-medium text-sm text-gray-800 dark:text-white">{state.state}</span>
-                    </div>
-                    <span className="text-base font-bold text-orange-700 dark:text-orange-400">
-                      {state.final_score.toFixed(1)}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.section>
-      )}
-    </main>
+    <span ref={ref}>
+      {count.toFixed(decimals)}{suffix}
+    </span>
   );
 }
 
-function StatsCard({ icon, label, value, suffix = '', color = 'energy' }: {
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.1 }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+  }
+};
+
+function FeatureCard({ icon, title, description, href, delay }: {
   icon: React.ReactNode;
-  label: string;
-  value: number | string;
-  suffix?: string;
-  color?: 'energy' | 'blue' | 'yellow' | 'green';
+  title: string;
+  description: string;
+  href: string;
+  delay: number;
 }) {
-  const colorClasses = {
-    energy: 'from-energy-500 to-energy-600',
-    blue: 'from-blue-500 to-blue-600',
-    yellow: 'from-yellow-500 to-yellow-600',
-    green: 'from-green-500 to-green-600',
-  };
+  return (
+    <motion.div variants={cardVariants}>
+      <Link href={href}>
+        <div className="glass rounded-2xl p-7 card-hover shine-sweep aurora-particles group cursor-pointer h-full">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white mb-5 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-500/30 transition-all duration-300">
+            {icon}
+          </div>
+          <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
+          <p className="text-gray-400 text-sm leading-relaxed mb-5">{description}</p>
+          <div className="flex items-center gap-2 text-emerald-400 text-sm font-semibold group-hover:gap-3 transition-all">
+            Explore <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+export default function LandingPage() {
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    getSummaryStats()
+      .then(setStats)
+      .catch(console.error);
+  }, []);
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.05, y: -5 }}
-      className="glass rounded-2xl p-6 card-hover"
-    >
-      <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]} text-white mb-4`}>
-        {icon}
+    <main className="min-h-screen relative overflow-hidden">
+      {/* Aurora Animated Background Blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-emerald-500/20 rounded-full blur-[120px] animate-aurora-pulse" />
+        <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-cyan-500/15 rounded-full blur-[120px] animate-aurora-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute -bottom-40 left-1/3 w-[500px] h-[500px] bg-violet-500/15 rounded-full blur-[120px] animate-aurora-pulse" style={{ animationDelay: '4s' }} />
       </div>
-      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</p>
-      <p className="text-2xl font-bold text-gray-800 dark:text-white">
-        {value}{suffix}
-      </p>
-    </motion.div>
+
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center max-w-4xl mx-auto"
+        >
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass mb-8"
+          >
+            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <span className="text-sm text-gray-300 font-medium">AI-Powered Energy Analytics</span>
+          </motion.div>
+
+          {/* Main Title */}
+          <h1 className="text-5xl sm:text-6xl md:text-8xl font-black mb-6 leading-tight">
+            <span className="aurora-text">GreenScore</span>
+            <br />
+            <span className="text-white">AI</span>
+          </h1>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed"
+          >
+            Comprehensive renewable energy readiness assessment for Indian States & Union Territories
+            with machine learning insights and scenario modeling
+          </motion.p>
+
+          {/* Animated Stats */}
+          {stats && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.6 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-14 max-w-3xl mx-auto"
+            >
+              <motion.div whileHover={{ y: -4 }} className="glass rounded-2xl p-5 text-center card-hover">
+                <p className="text-3xl md:text-4xl font-black text-emerald-400 mb-1">
+                  <AnimatedCounter end={stats.total_states} />
+                </p>
+                <p className="text-xs text-gray-500 font-medium">States Analyzed</p>
+              </motion.div>
+              <motion.div whileHover={{ y: -4 }} className="glass rounded-2xl p-5 text-center card-hover">
+                <p className="text-3xl md:text-4xl font-black text-cyan-400 mb-1">
+                  <AnimatedCounter end={stats.avg_score} decimals={1} />
+                </p>
+                <p className="text-xs text-gray-500 font-medium">Avg Score</p>
+              </motion.div>
+              <motion.div whileHover={{ y: -4 }} className="glass rounded-2xl p-5 text-center card-hover">
+                <p className="text-3xl md:text-4xl font-black text-violet-400 mb-1">
+                  <AnimatedCounter end={stats.total_capacity.solar / 1000} decimals={1} suffix=" GW" />
+                </p>
+                <p className="text-xs text-gray-500 font-medium">Solar Capacity</p>
+              </motion.div>
+              <motion.div whileHover={{ y: -4 }} className="glass rounded-2xl p-5 text-center card-hover">
+                <p className="text-3xl md:text-4xl font-black text-emerald-300 mb-1">
+                  <AnimatedCounter end={stats.total_capacity.total / 1000} decimals={1} suffix=" GW" />
+                </p>
+                <p className="text-xs text-gray-500 font-medium">Total Capacity</p>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {/* CTA Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.6 }}
+          >
+            <Link href="/dashboard">
+              <button className="aurora-glow-button text-white text-base sm:text-lg px-10 py-4 rounded-xl inline-flex items-center gap-3 group">
+                Enter Dashboard
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
+              </button>
+            </Link>
+          </motion.div>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        >
+          <div className="w-6 h-10 rounded-full border-2 border-gray-600 flex items-start justify-center p-1.5">
+            <motion.div
+              animate={{ y: [0, 12, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+            />
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Feature Cards Section */}
+      <section className="relative py-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-14"
+          >
+            <h2 className="text-3xl lg:text-4xl font-black text-white mb-4">Explore the Platform</h2>
+            <p className="text-gray-400 max-w-xl mx-auto leading-relaxed">
+              Powerful tools for analyzing India&apos;s renewable energy landscape
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            <FeatureCard
+              icon={<MapIcon className="w-7 h-7" />}
+              title="Interactive Map"
+              description="Explore state-wise renewable energy readiness with an interactive choropleth map of India."
+              href="/dashboard"
+              delay={0.1}
+            />
+            <FeatureCard
+              icon={<Brain className="w-7 h-7" />}
+              title="ML Insights"
+              description="K-Means clustering, Gaussian Mixture Models, and Isolation Forest anomaly detection."
+              href="/ml-insights"
+              delay={0.2}
+            />
+            <FeatureCard
+              icon={<Sliders className="w-7 h-7" />}
+              title="Simulator"
+              description="Model renewable energy scenarios and see projected score changes in real-time."
+              href="/simulator"
+              delay={0.3}
+            />
+            <FeatureCard
+              icon={<Trophy className="w-7 h-7" />}
+              title="Rankings"
+              description="Complete state rankings by GreenScore, solar capacity, wind capacity, and more."
+              href="/rankings"
+              delay={0.4}
+            />
+          </motion.div>
+        </div>
+      </section>
+    </main>
   );
 }

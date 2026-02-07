@@ -52,9 +52,10 @@ export default function IndiaMap({
 
     const g = svg.append('g');
 
-    const purpleScale = d3.scaleSequential()
+    // Aurora color scale: deep emerald -> cyan
+    const auroraScale = d3.scaleSequential()
       .domain([0, 100])
-      .interpolator(d3.interpolateRgb('#1e1b4b', '#a855f7'));
+      .interpolator(d3.interpolateRgb('#064e3b', '#06b6d4'));
 
     // Draw paths
     const paths = g.selectAll('path')
@@ -65,9 +66,9 @@ export default function IndiaMap({
       .attr('fill', (d: any) => {
         const stateName = d.properties.name || d.properties.ST_NM || d.properties.state;
         const data = stateData.get(stateName);
-        return data ? purpleScale(data.final_score) : '#374151';
+        return data ? auroraScale(data.final_score) : '#374151';
       })
-      .attr('stroke', '#6b7280')
+      .attr('stroke', '#334155')
       .attr('stroke-width', 1.5)
       .style('cursor', 'pointer');
 
@@ -75,9 +76,9 @@ export default function IndiaMap({
     paths.on('mouseenter', function(event, d: any) {
       const stateName = d.properties.name || d.properties.ST_NM || d.properties.state;
       const data = stateData.get(stateName);
-      
+
       d3.select(this)
-        .attr('stroke', '#d946ef')
+        .attr('stroke', '#10b981')
         .attr('stroke-width', 3);
 
       if (data) {
@@ -91,13 +92,13 @@ export default function IndiaMap({
 
     paths.on('mouseleave', function(event, d: any) {
       const stateName = d.properties.name || d.properties.ST_NM || d.properties.state;
-      
+
       if (stateName !== selectedState) {
         d3.select(this)
-          .attr('stroke', '#6b7280')
+          .attr('stroke', '#334155')
           .attr('stroke-width', 1.5);
       }
-      
+
       setHoveredState(null);
     });
 
@@ -115,7 +116,7 @@ export default function IndiaMap({
         className="w-full h-full"
         style={{ background: 'transparent' }}
       />
-      
+
       {/* Info Panel */}
       <div className="absolute top-6 left-6 z-50 pointer-events-none">
         <AnimatePresence mode="wait">
@@ -125,22 +126,22 @@ export default function IndiaMap({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="glass-strong rounded-2xl p-6 shadow-2xl border-2 border-purple-500/50 min-w-[280px]"
+              className="glass-strong rounded-2xl p-6 shadow-2xl border-2 border-emerald-500/50 min-w-[280px]"
             >
-              <h3 className="font-black text-3xl mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              <h3 className="font-black text-3xl mb-4 bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
                 {hoveredState.name}
               </h3>
-              
-              <div className="flex justify-between items-center mb-3 p-3 rounded-xl bg-purple-500/30">
+
+              <div className="flex justify-between items-center mb-3 p-3 rounded-xl bg-emerald-500/20">
                 <span className="text-white text-base font-bold">GreenScore</span>
-                <span className="font-black text-3xl text-purple-300">
+                <span className="font-black text-3xl text-emerald-300">
                   {hoveredState.score.toFixed(1)}
                 </span>
               </div>
-              
-              <div className="flex justify-between items-center p-3 rounded-xl bg-pink-500/30">
+
+              <div className="flex justify-between items-center p-3 rounded-xl bg-cyan-500/20">
                 <span className="text-white text-base font-bold">National Rank</span>
-                <span className="font-black text-3xl text-pink-300">
+                <span className="font-black text-3xl text-cyan-300">
                   #{hoveredState.rank}
                 </span>
               </div>

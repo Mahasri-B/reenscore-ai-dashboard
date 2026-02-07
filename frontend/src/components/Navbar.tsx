@@ -2,13 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Moon, Zap, Menu, X } from 'lucide-react';
+import { Zap, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
+<<<<<<< HEAD
   const [isDark, setIsDark] = useState(true); // Default to dark mode
+=======
+>>>>>>> d05045a (hk commit full ui refreshed)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+
+  const isLanding = pathname === '/';
 
   useEffect(() => {
     // Check system preference or localStorage
@@ -32,6 +39,7 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+<<<<<<< HEAD
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
@@ -45,6 +53,8 @@ export default function Navbar() {
     }
   };
 
+=======
+>>>>>>> d05045a (hk commit full ui refreshed)
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -60,7 +70,7 @@ export default function Navbar() {
             <motion.div
               whileHover={{ rotate: 180 }}
               transition={{ duration: 0.3 }}
-              className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 text-white"
+              className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 text-white"
             >
               <Zap className="w-6 h-6" />
             </motion.div>
@@ -69,14 +79,17 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            <NavLink href="/">Dashboard</NavLink>
-            <NavLink href="/ml-insights">ML Insights</NavLink>
-            <NavLink href="/simulator">Simulator</NavLink>
-            <NavLink href="/rankings">Rankings</NavLink>
-          </div>
+          {/* Desktop Navigation - hidden on landing */}
+          {!isLanding && (
+            <div className="hidden md:flex items-center gap-6">
+              <NavLink href="/dashboard" active={pathname === '/dashboard'}>Dashboard</NavLink>
+              <NavLink href="/ml-insights" active={pathname === '/ml-insights'}>ML Insights</NavLink>
+              <NavLink href="/simulator" active={pathname === '/simulator'}>Simulator</NavLink>
+              <NavLink href="/rankings" active={pathname === '/rankings'}>Rankings</NavLink>
+            </div>
+          )}
 
+<<<<<<< HEAD
           {/* Theme Toggle & Mobile Menu */}
           <div className="flex items-center gap-4">
             <motion.button
@@ -100,10 +113,23 @@ export default function Navbar() {
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
+=======
+          {/* Mobile Menu Button - hidden on landing */}
+          {!isLanding && (
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="md:hidden p-2 rounded-lg glass"
+              >
+                {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+          )}
+>>>>>>> d05045a (hk commit full ui refreshed)
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && (
+        {isMenuOpen && !isLanding && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -111,7 +137,7 @@ export default function Navbar() {
             className="md:hidden mt-4 glass rounded-lg p-4"
           >
             <div className="flex flex-col gap-2">
-              <MobileNavLink href="/" onClick={() => setIsMenuOpen(false)}>
+              <MobileNavLink href="/dashboard" onClick={() => setIsMenuOpen(false)}>
                 Dashboard
               </MobileNavLink>
               <MobileNavLink href="/ml-insights" onClick={() => setIsMenuOpen(false)}>
@@ -131,14 +157,18 @@ export default function Navbar() {
   );
 }
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+function NavLink({ href, children, active }: { href: string; children: React.ReactNode; active: boolean }) {
   return (
     <Link
       href={href}
-      className="text-sm text-gray-700 dark:text-gray-300 hover:text-energy-600 dark:hover:text-energy-400 font-medium transition-colors relative group"
+      className={`text-sm font-medium transition-colors relative group ${
+        active ? 'text-emerald-400' : 'text-gray-300 hover:text-emerald-400'
+      }`}
     >
       {children}
-      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-energy-500 group-hover:w-full transition-all duration-300" />
+      <span className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-300 ${
+        active ? 'w-full' : 'w-0 group-hover:w-full'
+      }`} />
     </Link>
   );
 }
@@ -148,7 +178,7 @@ function MobileNavLink({ href, children, onClick }: { href: string; children: Re
     <Link
       href={href}
       onClick={onClick}
-      className="px-4 py-2 rounded-lg hover:bg-energy-500/10 text-gray-700 dark:text-gray-300 font-medium transition-colors text-sm"
+      className="px-4 py-2 rounded-lg hover:bg-emerald-500/10 text-gray-300 font-medium transition-colors text-sm"
     >
       {children}
     </Link>

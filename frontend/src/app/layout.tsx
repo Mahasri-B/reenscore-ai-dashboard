@@ -7,8 +7,8 @@ import Navbar from '@/components/Navbar'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'India Energy Transition Dashboard',
-  description: 'Comprehensive renewable energy readiness assessment for Indian States',
+  title: 'GreenScore AI - Aurora Dashboard',
+  description: 'AI-powered renewable energy readiness assessment for Indian States',
 }
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark">
       <body className={inter.className}>
         <Providers>
           <Navbar />
