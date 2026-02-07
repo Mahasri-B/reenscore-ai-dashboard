@@ -241,7 +241,7 @@ def get_state_details(state_name: str):
         recommendations.append({
             "resource": "Solar",
             "action": "Expand Solar Infrastructure" if state["solar_score"] < 70 else "Optimize Solar Capacity",
-            "reason": f"Solar capacity at {state['solar_score']:.0f}th percentile. {'Significant growth potential with India\\'s abundant sunlight.' if state['solar_score'] < 70 else 'Further optimization can boost performance.'}",
+            "reason": f"Solar capacity at {state['solar_score']:.0f}th percentile. " + ("Significant growth potential with India's abundant sunlight." if state['solar_score'] < 70 else "Further optimization can boost performance."),
             "priority": priority,
             "current_level": f"{state['solar_score']:.0f}th percentile",
             "suggested_increase_pct": 60 if state["solar_score"] < 70 else 40
@@ -262,7 +262,7 @@ def get_state_details(state_name: str):
         recommendations.append({
             "resource": "Wind",
             "action": "Develop Wind Energy" if state["wind_score"] < 70 else "Enhance Wind Capacity",
-            "reason": f"Wind energy at {state['wind_score']:.0f}th percentile. {'Strategic expansion in high-wind zones recommended.' if state['wind_score'] < 70 else 'Incremental improvements will strengthen position.'}",
+            "reason": f"Wind energy at {state['wind_score']:.0f}th percentile. " + ("Strategic expansion in high-wind zones recommended." if state['wind_score'] < 70 else "Incremental improvements will strengthen position."),
             "priority": priority,
             "current_level": f"{state['wind_score']:.0f}th percentile",
             "suggested_increase_pct": 50 if state["wind_score"] < 70 else 35
@@ -283,7 +283,7 @@ def get_state_details(state_name: str):
         recommendations.append({
             "resource": "Small Hydro",
             "action": "Expand Hydro Projects" if state["small_hydro_score"] < 70 else "Develop Hydro Potential",
-            "reason": f"Small hydro at {state['small_hydro_score']:.0f}th percentile. {'Untapped river resources available for development.' if state['small_hydro_score'] < 70 else 'Additional projects can provide stable baseload.'}",
+            "reason": f"Small hydro at {state['small_hydro_score']:.0f}th percentile. " + ("Untapped river resources available for development." if state['small_hydro_score'] < 70 else "Additional projects can provide stable baseload."),
             "priority": priority,
             "current_level": f"{state['small_hydro_score']:.0f}th percentile",
             "suggested_increase_pct": 45 if state["small_hydro_score"] < 70 else 30
@@ -304,7 +304,7 @@ def get_state_details(state_name: str):
         recommendations.append({
             "resource": "Bio Power",
             "action": "Boost Biomass Energy" if state["bio_score"] < 75 else "Enhance Bio Capacity",
-            "reason": f"Biomass at {state['bio_score']:.0f}th percentile. {'Agricultural waste can be converted to energy, supporting rural economy.' if state['bio_score'] < 75 else 'Additional biomass projects will diversify energy mix.'}",
+            "reason": f"Biomass at {state['bio_score']:.0f}th percentile. " + ("Agricultural waste can be converted to energy, supporting rural economy." if state['bio_score'] < 75 else "Additional biomass projects will diversify energy mix."),
             "priority": priority,
             "current_level": f"{state['bio_score']:.0f}th percentile",
             "suggested_increase_pct": 40 if state["bio_score"] < 75 else 25
